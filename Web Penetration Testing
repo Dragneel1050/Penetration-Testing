@@ -1,17 +1,6 @@
-INJECTION
-BROKEN AUTHENTICATION
-SENSITIVE DATA EXPOSURE
-XML EXTERNAL ENTITIES (XXE)
-BROKEN ACCESS CONTROL
-SECURITY MISCONFIGURATION
-CROSS SITE SCRIPTING (XSS)
-INSECURE DESERIALIZATION
-USING COMPONENTS WITH KNOWN VULNERABILITIES
-INSUFFICIENT LOGGING AND MONITORING
-
 INJECTION:
-	Injection occurs when untrusted data is sent to an interpreter as part of a command or query. The attacker can trick the interpreter into executing unintended commands or accessing data without proper authorization.
-	Injection can result in data loss, corruption, or disclosure to unauthorized parties, loss of accountability, or denial of access. Injection can also lead to complete host takeover.	
+Injection occurs when untrusted data is sent to an interpreter as part of a command or query. The attacker can trick the interpreter into executing unintended commands or accessing data without proper authorization.
+Injection can result in data loss, corruption, or disclosure to unauthorized parties, loss of accountability, or denial of access. Injection can also lead to complete host takeover.	
 
 
 Reasons for injection:
