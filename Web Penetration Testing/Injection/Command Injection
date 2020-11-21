@@ -1,1 +1,87 @@
+Command injection is a web security vulnerability that allows an attacker to execute arbitrary operating system (OS) commands on the server that is running an application, and typically fully compromise the application and all its data.
+
+Example:
+
+http://example.com/ping.php?address=8.8.8.8%26dir
+
+The shell_exec function executes the following OS command: ping -n 3 8.8.8.8&dir. The & symbol in Windows separates OS commands. As a result, the vulnerable application executes an additional command (dir) and displays the command output (directory listing)
+
+
+
+
+----------------------Detection----------------------------
+
+Consider a shopping application that lets the user view whether an item is in stock in a particular store. This information is accessed via a URL like:
+
+https://example.com/stocksStatus?productID=38&storeID=29
+
+To provide the stock information, the application must query various legacy systems. For historical reasons, the functionality is implemented by calling out to a shell command with the product and store IDs as arguments:
+
+stocksreport.pl 38 29
+
+An attacker can submit the following input to execute an arbitrary command:
+
+& echo asdfgh &
+
+If this input is submitted in the productID parameter, then the command executed by the application is:
+
+stocksreport.pl & echo asdfgh & 29
+
+The echo command simply causes the supplied string to be echoed in the output, and is a useful way to test for some types of OS command injection
+
+
+
+
+-------------------------Blind Command Injection----------------------
+
+You can use an injected command that will trigger a time delay, allowing you to confirm that the command was executed based on the time that the application takes to respond. The ping command is an effective way to do this, as it lets you specify the number of ICMP packets to send, and therefore the time taken for the command to run:
+
+& ping -c 10 127.0.0.1 &
+
+This command will cause the application to ping its loopback network adapter for 10 seconds.
+
+
+
+
+-----------------------Methods of injecting OS commands------------------
+
+The following command separators work on both Windows and Unix-based systems:
+
+	• &
+	• &&
+	• |
+	• ||
+	
+The following command separators work only on Unix-based systems:
+
+	• ;
+	• Newline (0x0a or \n)
+	
+On Unix-based systems, you can also use backticks or the dollar character to perform inline execution of an injected command within the original command:
+
+	• ` injected command `
+	• $( injected command )
+	
+Sometimes, the input that you control appears within quotation marks in the original command. In this situation, you need to terminate the quoted context (using " or ') before using suitable shell metacharacters to inject a new command.
+
+
+
+----------------------------Prevention----------------------------
+
+
+Try to generally avoid system calls where possible
+ 
+
+In all cases, avoid user input of any kind unless it is absolutely necessary.
+
+
+And if it is necessary, make sure there is proper input validation in place 
+
+• Validating against a whitelist of permitted values.
+• Validating that the input is a number.
+• Validating that the input contains only alphanumeric characters, no other syntax or whitespace.
+
+ never call out to OS commands from application-layer code.
+
+
 
