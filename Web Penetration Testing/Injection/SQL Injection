@@ -1,17 +1,17 @@
 SQL injection is a web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database.
 
 
-Detection:
+--------------------Detection-------------
 
 This typically involves:
 	• Submitting the single quote character ' and looking for errors or other anomalies.
 	• Submitting some SQL-specific syntax that evaluates to the base (original) value of the entry point, and to a different value, and looking for systematic differences in the resulting application responses.
 	• Submitting Boolean conditions such as OR 1=1 and OR 1=2, and looking for differences in the application's responses.
 	• Submitting payloads designed to trigger time delays when executed within an SQL query, and looking for differences in the time taken to respond.
-  • Submitting OAST payloads designed to trigger an out-of-band network interaction when executed within an SQL query, and monitoring for any resulting interactions.
+  	• Submitting OAST payloads designed to trigger an out-of-band network interaction when executed within an SQL query, and monitoring for any resulting interactions.
 
 
-Prevention:
+--------------------Prevention--------------
 
 Most instances of SQL injection can be prevented by using parameterized queries (also known as prepared statements) instead of string concatenation within the query.
 The following code is vulnerable to SQL injection because the user input is concatenated directly into the query:
@@ -32,7 +32,9 @@ For a parameterized query to be effective in preventing SQL injection, the strin
 
 
 
-Step 1 check error:
+--------------------Practical--------------
+
+-=:Step 1 check error:=-
 
 '
 "
@@ -43,7 +45,10 @@ If ' gives error but double quote doesn’t that means it’s a single quote err
 If " gives error but single quote doesn't that means it’s a double quote error with or without parentheses 
 
 
-Step 2 check error type:
+
+
+-=:Step 2 check error type:=-
+
 
 For integer:
 
@@ -56,6 +61,7 @@ Integer and false	    -> No output
 Integer and true--+	  -> Same output
 Integer--+	          -> Same output
 
+
 For single quote:
 
 '       -> error/no output
@@ -63,6 +69,7 @@ For single quote:
 ' and '1'='1	       -> same output
 ' and true--+	       -> same output
 ' and false--+	     -> no output
+
 
 For double quote:
 
@@ -73,7 +80,41 @@ For double quote:
 " and false--+	    -> No output
 
 
-Step 3 check the comments to balance the query: 
+For integer with brackets
+
+Same as without but only this difference
+
+Integer and 1=1		-> Different output
+Integer--+		-> Error/no output
+Integer)--+		-> Same output
+Integer) and false--+	-> No output
+Integer) and true--+	-> Same output
+
+
+For single quote with brackets
+Same as without but the diff is
+
+' and '1'='1		->Diff output
+' and true--+		->No output
+') and False--+		->No output
+') and true--+		->Same output
+') or true--+		->Diff output
+
+
+For double quote with brackets
+Same as without but the diff is
+
+" and "1"="1 		->Diff output
+" and true--+		->No output
+") and False--+		->No output
+") and true--+		->Same output
+") or true--+		->Diff output
+
+
+
+
+
+-=:Step 3 check the comments to balance the query:=- 
 
 --
 --+
@@ -105,7 +146,10 @@ Use the comment that will remove the error and displays the original result
 
 
 
-Step 4 check the number of columns:
+
+
+
+-=:Step 4 check the number of columns:=-
 
 Use "order by <number of columns>"
 Increase the number of column  1 by 1.. Start from 1.. Wherever it gives an error the number of columns are one less than that number
@@ -121,7 +165,9 @@ Always write injectable queries between comment and the balance
 
 
 
-Step 5 Union injection:
+
+
+-=:Step 5 Union injection:=-
 
 Use "union select <1,2,3….,n (till the number of columns>"
 
@@ -144,7 +190,10 @@ You can use
 
 
 
-Step 6  Get table names, column names and get data:
+
+
+
+-=:Step 6  Get table names, column names and get data:=-
 
 Whichever number gets reflected, use commands instead of that number in the query to do  injection.
 
