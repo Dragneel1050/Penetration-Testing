@@ -1,7 +1,7 @@
 SQL injection is a web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database.
 
 
---------------------Detection-------------
+##--------------------Detection-------------
 
 This typically involves:
 	• Submitting the single quote character ' and looking for errors or other anomalies.
@@ -11,7 +11,7 @@ This typically involves:
   	• Submitting OAST payloads designed to trigger an out-of-band network interaction when executed within an SQL query, and monitoring for any resulting interactions.
 
 
---------------------Prevention--------------
+##--------------------Prevention--------------
 
 Most instances of SQL injection can be prevented by using parameterized queries (also known as prepared statements) instead of string concatenation within the query.
 The following code is vulnerable to SQL injection because the user input is concatenated directly into the query:
@@ -32,9 +32,9 @@ For a parameterized query to be effective in preventing SQL injection, the strin
 
 
 
---------------------Practical--------------
+##--------------------Practical--------------
 
--=:Step 1 check error:=-
+###-=:Step 1 check error:=-
 
 '
 "
@@ -47,7 +47,7 @@ If " gives error but single quote doesn't that means it’s a double quote error
 
 
 
--=:Step 2 check error type:=-
+###-=:Step 2 check error type:=-
 
 
 For integer:
@@ -114,7 +114,7 @@ Same as without but the diff is
 
 
 
--=:Step 3 check the comments to balance the query:=- 
+###-=:Step 3 check the comments to balance the query:=- 
 
 --
 --+
@@ -149,7 +149,7 @@ Use the comment that will remove the error and displays the original result
 
 
 
--=:Step 4 check the number of columns:=-
+###-=:Step 4 check the number of columns:=-
 
 Use "order by <number of columns>"
 Increase the number of column  1 by 1.. Start from 1.. Wherever it gives an error the number of columns are one less than that number
@@ -167,7 +167,7 @@ Always write injectable queries between comment and the balance
 
 
 
--=:Step 5 Union injection:=-
+###-=:Step 5 Union injection:=-
 
 Use "union select <1,2,3….,n (till the number of columns>"
 
@@ -193,7 +193,7 @@ You can use
 
 
 
--=:Step 6  Get table names, column names and get data:=-
+###-=:Step 6  Get table names, column names and get data:=-
 
 Whichever number gets reflected, use commands instead of that number in the query to do  injection.
 
